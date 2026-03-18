@@ -34,6 +34,8 @@ final class CreateTimerViewController: UIViewController {
 
     // MARK: - UI (built in code)
 
+    private let bgImageView = UIImageView()
+    private let decorView = ChibiDecorView()
     private let scrollView = UIScrollView()
     private let contentStack = UIStackView()
     private let nameTextField = UITextField()
@@ -61,9 +63,30 @@ final class CreateTimerViewController: UIViewController {
         view.backgroundColor = .systemBackground
     }
 
+    private func setupBackground() {
+        bgImageView.translatesAutoresizingMaskIntoConstraints = false
+        bgImageView.contentMode = .scaleAspectFill
+        bgImageView.clipsToBounds = true
+        bgImageView.image = UIImage(named: AppDesign.backgroundImageName)
+        view.insertSubview(bgImageView, at: 0)
+        decorView.translatesAutoresizingMaskIntoConstraints = false
+        view.insertSubview(decorView, aboveSubview: bgImageView)
+        NSLayoutConstraint.activate([
+            bgImageView.topAnchor.constraint(equalTo: view.topAnchor),
+            bgImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            bgImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            bgImageView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            decorView.topAnchor.constraint(equalTo: view.topAnchor),
+            decorView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            decorView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            decorView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Create Timer"
+        setupBackground()
         buildUI()
         setupActions()
         setInitialValues()
@@ -120,6 +143,7 @@ final class CreateTimerViewController: UIViewController {
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.keyboardDismissMode = .onDrag
         scrollView.delaysContentTouches = false
+        scrollView.backgroundColor = .clear
         view.addSubview(scrollView)
 
         contentStack.axis = .vertical
@@ -127,29 +151,39 @@ final class CreateTimerViewController: UIViewController {
         contentStack.translatesAutoresizingMaskIntoConstraints = false
         scrollView.addSubview(contentStack)
 
+        // Subtitle
+        let subtitleLbl = UILabel()
+        subtitleLbl.text = "Design your perfect routine! 💪"
+        subtitleLbl.font = AppDesign.captionFont()
+        subtitleLbl.textColor = .secondaryLabel
+        subtitleLbl.textAlignment = .center
+        subtitleLbl.translatesAutoresizingMaskIntoConstraints = false
+        contentStack.addArrangedSubview(subtitleLbl)
+
         // Timer Name
-        let nameSection = makeSection(title: "Timer Name", field: nameTextField)
+        let nameSection = makeSection(title: "✨ Timer Name", field: nameTextField)
         contentStack.addArrangedSubview(nameSection)
 
         // Timer Type
         timerTypeButton.setTitle(selectedType.title, for: .normal)
         timerTypeButton.contentHorizontalAlignment = .leading
-        let typeSection = makeSection(title: "Timer Type", field: timerTypeButton)
+        let typeSection = makeSection(title: "📚 Timer Type", field: timerTypeButton)
         contentStack.addArrangedSubview(typeSection)
 
         // Loops
         loopsTextField.keyboardType = .numberPad
-        let loopsSection = makeSection(title: "Number of Loops", field: loopsTextField)
+        let loopsSection = makeSection(title: "🔢 Number of Loops", field: loopsTextField)
         contentStack.addArrangedSubview(loopsSection)
 
         // Durations
-        startLabel.text = "Start"
-        focusLabel.text = "Focus"
-        breakLabel.text = "Break"
+        startLabel.text = "🚀 Start"
+        focusLabel.text = "🎯 Focus"
+        breakLabel.text = "☕ Break"
         [startTextField, focusTextField, breakTextField].forEach {
             $0.keyboardType = .numbersAndPunctuation
-            $0.borderStyle = .roundedRect
+            $0.borderStyle = .none
             $0.textAlignment = .center
+            $0.font = AppDesign.bodyFont()
         }
         startMinusBtn.setTitle("−", for: .normal)
         startPlusBtn.setTitle("+", for: .normal)
@@ -157,22 +191,73 @@ final class CreateTimerViewController: UIViewController {
         focusPlusBtn.setTitle("+", for: .normal)
         breakMinusBtn.setTitle("−", for: .normal)
         breakPlusBtn.setTitle("+", for: .normal)
+        startMinusBtn.titleLabel?.font = AppDesign.headlineFont()
+        startPlusBtn.titleLabel?.font = AppDesign.headlineFont()
+        startMinusBtn.backgroundColor = UIColor(red: 0.6, green: 0.9, blue: 0.85, alpha: 0.5)
+        startPlusBtn.backgroundColor = UIColor(red: 0.6, green: 0.9, blue: 0.85, alpha: 0.5)
+        focusMinusBtn.titleLabel?.font = AppDesign.headlineFont()
+        focusPlusBtn.titleLabel?.font = AppDesign.headlineFont()
+        focusMinusBtn.backgroundColor = UIColor.systemPink.withAlphaComponent(0.4)
+        focusPlusBtn.backgroundColor = UIColor.systemPink.withAlphaComponent(0.4)
+        breakMinusBtn.titleLabel?.font = AppDesign.headlineFont()
+        breakPlusBtn.titleLabel?.font = AppDesign.headlineFont()
+        breakMinusBtn.backgroundColor = UIColor(red: 0.7, green: 0.85, blue: 1, alpha: 0.5)
+        breakPlusBtn.backgroundColor = UIColor(red: 0.7, green: 0.85, blue: 1, alpha: 0.5)
+        [startMinusBtn, startPlusBtn, focusMinusBtn, focusPlusBtn, breakMinusBtn, breakPlusBtn].forEach {
+            $0.layer.cornerRadius = AppDesign.cornerRadiusSmall
+        }
 
-        contentStack.addArrangedSubview(makeDurationRow(label: startLabel, minus: startMinusBtn, field: startTextField, plus: startPlusBtn))
-        contentStack.addArrangedSubview(makeDurationRow(label: focusLabel, minus: focusMinusBtn, field: focusTextField, plus: focusPlusBtn))
-        contentStack.addArrangedSubview(makeDurationRow(label: breakLabel, minus: breakMinusBtn, field: breakTextField, plus: breakPlusBtn))
+        let startRow = makeDurationRow(label: startLabel, minus: startMinusBtn, field: startTextField, plus: startPlusBtn)
+        let focusRow = makeDurationRow(label: focusLabel, minus: focusMinusBtn, field: focusTextField, plus: focusPlusBtn)
+        let breakRow = makeDurationRow(label: breakLabel, minus: breakMinusBtn, field: breakTextField, plus: breakPlusBtn)
+        let durationWraps: [(UIView, UIColor)] = [
+            (startRow, UIColor(red: 0.85, green: 0.98, blue: 0.95, alpha: 0.9)),
+            (focusRow, UIColor(red: 1, green: 0.92, blue: 0.95, alpha: 0.9)),
+            (breakRow, UIColor(red: 0.9, green: 0.95, blue: 1, alpha: 0.9)),
+        ]
+        durationWraps.forEach { row, tint in
+            let wrap = UIView()
+            wrap.backgroundColor = tint
+            wrap.layer.cornerRadius = AppDesign.cornerRadius
+            wrap.addSubview(row)
+            row.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                row.topAnchor.constraint(equalTo: wrap.topAnchor, constant: 16),
+                row.leadingAnchor.constraint(equalTo: wrap.leadingAnchor, constant: 16),
+                row.trailingAnchor.constraint(equalTo: wrap.trailingAnchor, constant: -16),
+                row.bottomAnchor.constraint(equalTo: wrap.bottomAnchor, constant: -16),
+            ])
+            contentStack.addArrangedSubview(wrap)
+        }
+        startLabel.textColor = UIColor(red: 0.2, green: 0.6, blue: 0.55, alpha: 1)
+        focusLabel.textColor = UIColor(red: 0.85, green: 0.35, blue: 0.5, alpha: 1)
+        breakLabel.textColor = UIColor(red: 0.3, green: 0.5, blue: 0.8, alpha: 1)
 
         // Buttons
         let btnStack = UIStackView(arrangedSubviews: [cancelButton, createButton])
         btnStack.axis = .horizontal
         btnStack.spacing = 16
         btnStack.distribution = .fillEqually
-        cancelButton.setTitle("Cancel", for: .normal)
         cancelButton.configuration = .filled()
         cancelButton.configuration?.baseBackgroundColor = .systemGray
-        createButton.setTitle("Create", for: .normal)
+        cancelButton.configuration?.title = "Cancel"
+        cancelButton.configuration?.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = AppDesign.bodyFont()
+            return outgoing
+        }
         createButton.configuration = .filled()
         createButton.configuration?.baseBackgroundColor = .systemPink
+        createButton.configuration?.title = "Create ✨"
+        createButton.configuration?.titleTextAttributesTransformer = UIConfigurationTextAttributesTransformer { incoming in
+            var outgoing = incoming
+            outgoing.font = AppDesign.bodyFont()
+            return outgoing
+        }
+        [cancelButton, createButton].forEach {
+            $0.layer.cornerRadius = AppDesign.cornerRadiusButton
+            $0.clipsToBounds = true
+        }
         contentStack.addArrangedSubview(btnStack)
 
         NSLayoutConstraint.activate([
@@ -192,7 +277,8 @@ final class CreateTimerViewController: UIViewController {
         let v = UIView()
         let lbl = UILabel()
         lbl.text = title
-        lbl.font = .systemFont(ofSize: 17)
+        lbl.font = AppDesign.bodyFont()
+        lbl.textColor = .label
         field.translatesAutoresizingMaskIntoConstraints = false
         lbl.translatesAutoresizingMaskIntoConstraints = false
         v.addSubview(lbl)
@@ -207,8 +293,18 @@ final class CreateTimerViewController: UIViewController {
             field.heightAnchor.constraint(equalToConstant: 36),
             field.bottomAnchor.constraint(equalTo: v.bottomAnchor, constant: -16),
         ])
-        v.backgroundColor = .secondarySystemBackground
-        v.layer.cornerRadius = 8
+        v.backgroundColor = UIColor(red: 1, green: 0.98, blue: 0.99, alpha: 0.92)
+        v.layer.cornerRadius = AppDesign.cornerRadius
+        v.layer.masksToBounds = true
+        if let tf = field as? UITextField {
+            tf.font = AppDesign.bodyFont()
+            tf.borderStyle = .none
+            tf.layer.cornerRadius = AppDesign.cornerRadiusSmall
+            tf.backgroundColor = UIColor.secondarySystemBackground.withAlphaComponent(0.6)
+        }
+        if let btn = field as? UIButton {
+            btn.titleLabel?.font = AppDesign.bodyFont()
+        }
         return v
     }
 
@@ -228,7 +324,7 @@ final class CreateTimerViewController: UIViewController {
         let container = UIStackView(arrangedSubviews: [label, row])
         container.axis = .vertical
         container.spacing = 8
-        label.font = .systemFont(ofSize: 17)
+        label.font = AppDesign.bodyFont()
         return container
     }
 

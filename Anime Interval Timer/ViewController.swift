@@ -13,6 +13,24 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        applyChibiFonts()
+    }
+
+    private func applyChibiFonts() {
+        func styleSubviews(in view: UIView) {
+            for subview in view.subviews {
+                if let lbl = subview as? UILabel {
+                    lbl.font = lbl.font.pointSize > 20 ? AppDesign.titleFont() : AppDesign.captionFont()
+                }
+                if let btn = subview as? UIButton {
+                    btn.titleLabel?.font = AppDesign.bodyFont()
+                    btn.layer.cornerRadius = AppDesign.cornerRadiusButton
+                    btn.clipsToBounds = true
+                }
+                styleSubviews(in: subview)
+            }
+        }
+        styleSubviews(in: view)
     }
 
     override func viewDidAppear(_ animated: Bool) {

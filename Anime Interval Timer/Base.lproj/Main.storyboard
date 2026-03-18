@@ -121,7 +121,7 @@
                                 <color key="textColor" red="0.5927129690704781" green="0.42316110793752842" blue="0.60180768402474216" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Chose a timer or create new one" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Am1-hb-BTF">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Choose a timer or create new one" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Am1-hb-BTF">
                                 <rect key="frame" x="98.333333333333329" y="204.66666666666666" width="196.33333333333337" height="15.666666666666657"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                 <color key="textColor" red="0.67725259829999995" green="0.48351727529999999" blue="0.68764450749999995" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
@@ -311,7 +311,7 @@
                                             <outlet property="loopsLabel" destination="gNA-Hb-2o3" id="out-loops"/>
                                             <outlet property="startButton" destination="9KE-G9-6HM" id="out-startbtn"/>
                                             <outlet property="startValueLabel" destination="x7r-Ik-qTH" id="out-startval"/>
-                                            <outlet property="titleLabel" destination="kOu-OF-rzv" id="out-title"/>
+                                            <outlet property="titleLabel" destination="kOu-OF-rzv" id="out-cell-title"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -347,7 +347,10 @@
                     <navigationItem key="navigationItem" id="oqp-ym-cIy"/>
                     <connections>
                         <outlet property="addNewTimerButton" destination="nwq-x8-Ur7" id="out-addbtn"/>
+                        <outlet property="addNewTimerStack" destination="Dhm-5a-QRv" id="out-addstack"/>
+                        <outlet property="subtitleLabel" destination="Am1-hb-BTF" id="out-subtitle"/>
                         <outlet property="tableView" destination="T3S-7n-dTV" id="out-table"/>
+                        <outlet property="titleLabel" destination="mFB-dv-GbS" id="out-title"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6g1-9O-nDp" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
