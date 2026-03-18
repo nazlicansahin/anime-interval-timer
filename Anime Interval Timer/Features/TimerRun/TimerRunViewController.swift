@@ -21,11 +21,11 @@ enum TimerPhase: Int, CaseIterable {
         }
     }
 
-    var stateTitle: String {
+    var stateTitle: (japanese: String, english: String) {
         switch self {
-        case .start: return "Start"
-        case .focus: return "Focus"
-        case .break_: return "Break"
+        case .start: return ("準備できた？先輩", "Ready, Senpai?")
+        case .focus: return ("できるよ！先輩", "You can do it, Senpai!")
+        case .break_: return ("休憩だよ、先輩", "Break time, Senpai!")
         }
     }
 
@@ -44,6 +44,14 @@ enum TimerPhase: Int, CaseIterable {
         case .break_: return "stop-btn-blue"
         }
     }
+
+    var phaseIconImageName: String {
+        switch self {
+        case .start: return "rocket"
+        case .focus: return "dart"
+        case .break_: return "coffe"
+        }
+    }
 }
 
 final class TimerRunViewController: UIViewController {
@@ -60,10 +68,11 @@ final class TimerRunViewController: UIViewController {
     private let contentStack = UIStackView()
     private let bgImageView = UIImageView()
     private let titleLabel = UILabel()
-    private let emojiLabel = UILabel()
+    private let phaseIconImageView = UIImageView()
     private let animeImageView = UIImageView()
     private let timerLabel = UILabel()
     private let stateLabel = UILabel()
+    private let stateEnglishLabel = UILabel()
     private let prevTourButton = UIButton(type: .custom)
     private let controlButton = UIButton(type: .custom)
     private let nextTourButton = UIButton(type: .custom)
@@ -72,6 +81,7 @@ final class TimerRunViewController: UIViewController {
     private let finishBgImageView = UIImageView()
     private let finishJapaneseLabel = UILabel()
     private let finishRomajiLabel = UILabel()
+    private let finishEnglishLabel = UILabel()
     private var confettiEmitter: CAEmitterLayer?
 
     override func loadView() {
@@ -81,7 +91,7 @@ final class TimerRunViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = timer?.title ?? "Timer"
+        title = ""
         buildUI()
         buildFinishUI()
         resetToStart()
@@ -134,10 +144,9 @@ final class TimerRunViewController: UIViewController {
         titleLabel.font = .systemFont(ofSize: 20)
         view.addSubview(titleLabel)
 
-        emojiLabel.translatesAutoresizingMaskIntoConstraints = false
-        emojiLabel.textAlignment = .center
-        emojiLabel.font = .systemFont(ofSize: 32)
-        view.addSubview(emojiLabel)
+        phaseIconImageView.translatesAutoresizingMaskIntoConstraints = false
+        phaseIconImageView.contentMode = .scaleAspectFit
+        view.addSubview(phaseIconImageView)
 
         animeImageView.translatesAutoresizingMaskIntoConstraints = false
         animeImageView.contentMode = .scaleAspectFit
@@ -150,16 +159,38 @@ final class TimerRunViewController: UIViewController {
 
         stateLabel.translatesAutoresizingMaskIntoConstraints = false
         stateLabel.textAlignment = .center
-        stateLabel.font = .systemFont(ofSize: 17)
+        stateLabel.font = AppDesign.roundedFont(size: 20, weight: .medium)
+        stateLabel.textColor = .white
+        stateLabel.layer.shadowColor = UIColor.black.cgColor
+        stateLabel.layer.shadowOffset = CGSize(width: 0, height: 1)
+        stateLabel.layer.shadowRadius = 2
+        stateLabel.layer.shadowOpacity = 0.5
+        stateLabel.numberOfLines = 0
         view.addSubview(stateLabel)
+
+        stateEnglishLabel.translatesAutoresizingMaskIntoConstraints = false
+        stateEnglishLabel.textAlignment = .center
+        stateEnglishLabel.font = AppDesign.captionFont()
+        stateEnglishLabel.textColor = UIColor.white.withAlphaComponent(0.9)
+        stateEnglishLabel.layer.shadowColor = UIColor.black.cgColor
+        stateEnglishLabel.layer.shadowOffset = CGSize(width: 0, height: 1)
+        stateEnglishLabel.layer.shadowRadius = 1
+        stateEnglishLabel.layer.shadowOpacity = 0.4
+        view.addSubview(stateEnglishLabel)
 
         let btnStack = UIStackView(arrangedSubviews: [prevTourButton, controlButton, nextTourButton])
         btnStack.axis = .horizontal
-        btnStack.distribution = .fillEqually
-        btnStack.spacing = 0
+        btnStack.distribution = .equalSpacing
+        btnStack.alignment = .center
+        btnStack.spacing = 8
         btnStack.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(btnStack)
 
+        [prevTourButton, controlButton, nextTourButton].forEach {
+            $0.imageView?.contentMode = .scaleAspectFit
+            $0.contentHorizontalAlignment = .center
+            $0.contentVerticalAlignment = .center
+        }
         prevTourButton.setImage(mirroredImage(named: "next-tour-btn"), for: .normal)
         prevTourButton.addTarget(self, action: #selector(prevTourTapped), for: .touchUpInside)
 
@@ -167,6 +198,10 @@ final class TimerRunViewController: UIViewController {
         nextTourButton.addTarget(self, action: #selector(nextTourTapped), for: .touchUpInside)
 
         controlButton.addTarget(self, action: #selector(controlTapped), for: .touchUpInside)
+
+        prevTourButton.translatesAutoresizingMaskIntoConstraints = false
+        controlButton.translatesAutoresizingMaskIntoConstraints = false
+        nextTourButton.translatesAutoresizingMaskIntoConstraints = false
 
         NSLayoutConstraint.activate([
             bgImageView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -178,10 +213,12 @@ final class TimerRunViewController: UIViewController {
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 
-            emojiLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
-            emojiLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            phaseIconImageView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+            phaseIconImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            phaseIconImageView.widthAnchor.constraint(equalToConstant: 49),
+            phaseIconImageView.heightAnchor.constraint(equalToConstant: 49),
 
-            animeImageView.topAnchor.constraint(equalTo: emojiLabel.bottomAnchor, constant: 32),
+            animeImageView.topAnchor.constraint(equalTo: phaseIconImageView.bottomAnchor, constant: 32),
             animeImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 72),
             animeImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -72),
             animeImageView.heightAnchor.constraint(equalToConstant: 318),
@@ -190,13 +227,22 @@ final class TimerRunViewController: UIViewController {
             timerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
 
             btnStack.topAnchor.constraint(equalTo: timerLabel.bottomAnchor, constant: 16),
-            btnStack.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 57),
-            btnStack.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -57),
-            btnStack.heightAnchor.constraint(equalToConstant: 60),
+            btnStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            prevTourButton.widthAnchor.constraint(equalToConstant: 80),
+            prevTourButton.heightAnchor.constraint(equalToConstant: 80),
+            controlButton.widthAnchor.constraint(equalToConstant: 100),
+            controlButton.heightAnchor.constraint(equalToConstant: 100),
+            nextTourButton.widthAnchor.constraint(equalToConstant: 80),
+            nextTourButton.heightAnchor.constraint(equalToConstant: 80),
 
             stateLabel.topAnchor.constraint(equalTo: btnStack.bottomAnchor, constant: 16),
+            stateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            stateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             stateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stateLabel.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor),
+
+            stateEnglishLabel.topAnchor.constraint(equalTo: stateLabel.bottomAnchor, constant: 4),
+            stateEnglishLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stateEnglishLabel.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
     }
 
@@ -213,17 +259,31 @@ final class TimerRunViewController: UIViewController {
         finishContainer.addSubview(finishBgImageView)
 
         finishJapaneseLabel.translatesAutoresizingMaskIntoConstraints = false
-        finishJapaneseLabel.text = "おめでとう 先輩"
-        finishJapaneseLabel.font = .systemFont(ofSize: 36)
+        finishJapaneseLabel.text = "やった！おめでとう 先輩！！"
+        finishJapaneseLabel.font = AppDesign.roundedFont(size: 40, weight: .bold)
         finishJapaneseLabel.textAlignment = .center
+        finishJapaneseLabel.textColor = UIColor(red: 0.95, green: 0.35, blue: 0.45, alpha: 1)
+        finishJapaneseLabel.layer.shadowColor = UIColor.white.cgColor
+        finishJapaneseLabel.layer.shadowOffset = CGSize(width: 1, height: 1)
+        finishJapaneseLabel.layer.shadowRadius = 2
+        finishJapaneseLabel.layer.shadowOpacity = 0.8
+        finishJapaneseLabel.numberOfLines = 0
         finishContainer.addSubview(finishJapaneseLabel)
 
         finishRomajiLabel.translatesAutoresizingMaskIntoConstraints = false
-        finishRomajiLabel.text = "Omedetō Senpai"
-        finishRomajiLabel.font = .systemFont(ofSize: 24)
+        finishRomajiLabel.text = "Yatta! Omedetō Senpai!! ✨"
+        finishRomajiLabel.font = AppDesign.roundedFont(size: 22, weight: .medium)
         finishRomajiLabel.textAlignment = .center
-        finishRomajiLabel.alpha = 0.9
+        finishRomajiLabel.textColor = UIColor(red: 0.6, green: 0.25, blue: 0.35, alpha: 1)
+        finishRomajiLabel.alpha = 0.95
         finishContainer.addSubview(finishRomajiLabel)
+
+        finishEnglishLabel.translatesAutoresizingMaskIntoConstraints = false
+        finishEnglishLabel.text = "Congratulations, Senpai!"
+        finishEnglishLabel.font = AppDesign.roundedFont(size: 18, weight: .medium)
+        finishEnglishLabel.textAlignment = .center
+        finishEnglishLabel.textColor = UIColor(red: 0.5, green: 0.2, blue: 0.3, alpha: 0.9)
+        finishContainer.addSubview(finishEnglishLabel)
 
         NSLayoutConstraint.activate([
             finishContainer.topAnchor.constraint(equalTo: view.topAnchor),
@@ -236,11 +296,15 @@ final class TimerRunViewController: UIViewController {
             finishBgImageView.trailingAnchor.constraint(equalTo: finishContainer.trailingAnchor),
             finishBgImageView.bottomAnchor.constraint(equalTo: finishContainer.bottomAnchor),
 
-            finishJapaneseLabel.centerXAnchor.constraint(equalTo: finishContainer.centerXAnchor),
-            finishJapaneseLabel.centerYAnchor.constraint(equalTo: finishContainer.centerYAnchor, constant: -20),
+            finishJapaneseLabel.leadingAnchor.constraint(equalTo: finishContainer.leadingAnchor, constant: 24),
+            finishJapaneseLabel.trailingAnchor.constraint(equalTo: finishContainer.trailingAnchor, constant: -24),
+            finishJapaneseLabel.centerYAnchor.constraint(equalTo: finishContainer.centerYAnchor, constant: -30),
 
             finishRomajiLabel.topAnchor.constraint(equalTo: finishJapaneseLabel.bottomAnchor, constant: 12),
             finishRomajiLabel.centerXAnchor.constraint(equalTo: finishContainer.centerXAnchor),
+
+            finishEnglishLabel.topAnchor.constraint(equalTo: finishRomajiLabel.bottomAnchor, constant: 8),
+            finishEnglishLabel.centerXAnchor.constraint(equalTo: finishContainer.centerXAnchor),
         ])
     }
 
@@ -358,7 +422,7 @@ final class TimerRunViewController: UIViewController {
 
     private func updateUI() {
         titleLabel.text = timer?.title ?? "Timer"
-        emojiLabel.text = timer?.emoji
+        phaseIconImageView.image = UIImage(named: phase.phaseIconImageName)
 
         bgImageView.image = UIImage(named: phase.bgImageName)
         let names = phase.animeImageName
@@ -366,7 +430,9 @@ final class TimerRunViewController: UIViewController {
         animeImageView.image = UIImage(named: imgName)
 
         timerLabel.text = Self.format(seconds: remainingSeconds)
-        stateLabel.text = phase.stateTitle
+        let state = phase.stateTitle
+        stateLabel.text = state.japanese
+        stateEnglishLabel.text = state.english
     }
 
     private func updateControlButton() {
@@ -416,7 +482,8 @@ final class TimerRunViewController: UIViewController {
         isRunning = false
 
         titleLabel.isHidden = true
-        emojiLabel.isHidden = true
+        phaseIconImageView.isHidden = true
+        stateEnglishLabel.isHidden = true
         animeImageView.isHidden = true
         timerLabel.isHidden = true
         stateLabel.isHidden = true

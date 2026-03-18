@@ -85,7 +85,7 @@ final class CreateTimerViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "Create Timer"
+        title = ""
         setupBackground()
         buildUI()
         setupActions()

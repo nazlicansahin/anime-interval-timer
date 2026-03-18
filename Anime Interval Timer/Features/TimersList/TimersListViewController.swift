@@ -14,13 +14,15 @@ final class TimersListViewController: UIViewController {
     @IBOutlet private weak var titleLabel: UILabel?
     @IBOutlet private weak var subtitleLabel: UILabel?
     @IBOutlet private weak var addNewTimerStack: UIStackView?
+    @IBOutlet private weak var addNewTimerLabel: UILabel?
 
     private let viewModel = TimersListViewModel()
     private let decorView = ChibiDecorView()
+    private let haptic = UIImpactFeedbackGenerator(style: .light)
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = "My Timers"
+        title = ""
 
         tableView?.dataSource = self
         tableView?.delegate = self
@@ -28,6 +30,7 @@ final class TimersListViewController: UIViewController {
         tableView?.rowHeight = 170
         tableView?.estimatedRowHeight = 170
 
+        haptic.prepare()
         applyChibiDesign()
         viewModel.reload()
         tableView?.reloadData()
@@ -51,21 +54,28 @@ final class TimersListViewController: UIViewController {
         ])
         addNewTimerStack?.layer.cornerRadius = AppDesign.cornerRadiusPill
         addNewTimerStack?.clipsToBounds = true
-        addNewTimerStack?.backgroundColor = UIColor(red: 1, green: 0.98, blue: 0.99, alpha: 0.95)
+        addNewTimerStack?.backgroundColor = UIColor(red: 1, green: 0.97, blue: 0.98, alpha: 0.96)
         addNewTimerStack?.layer.borderWidth = 0.5
-        addNewTimerStack?.layer.borderColor = UIColor(red: 1, green: 0.9, blue: 0.95, alpha: 0.6).cgColor
-        addNewTimerStack?.layoutMargins = UIEdgeInsets(top: 10, left: 16, bottom: 10, right: 16)
+        addNewTimerStack?.layer.borderColor = UIColor(red: 0.59, green: 0.42, blue: 0.60, alpha: 0.4).cgColor
+        addNewTimerStack?.layoutMargins = UIEdgeInsets(top: 14, left: 20, bottom: 14, right: 20)
         addNewTimerStack?.isLayoutMarginsRelativeArrangement = true
-        addNewTimerStack?.subviews.compactMap { $0 as? UILabel }.forEach { $0.font = AppDesign.bodyFont() }
-        addNewTimerButton?.layer.cornerRadius = 20
+        addNewTimerLabel?.font = AppDesign.headlineFont()
+        addNewTimerLabel?.textColor = UIColor(red: 0.59, green: 0.42, blue: 0.60, alpha: 1)
+        addNewTimerButton?.layer.cornerRadius = 24
         addNewTimerButton?.clipsToBounds = true
+        addNewTimerButton?.layer.shadowColor = UIColor(red: 0.59, green: 0.42, blue: 0.60, alpha: 0.4).cgColor
+        addNewTimerButton?.layer.shadowOffset = CGSize(width: 0, height: 2)
+        addNewTimerButton?.layer.shadowRadius = 4
+        addNewTimerButton?.layer.shadowOpacity = 0.3
+        addNewTimerButton?.backgroundColor = UIColor(red: 0.59, green: 0.42, blue: 0.60, alpha: 0.25)
+        addNewTimerButton?.tintColor = UIColor(red: 0.59, green: 0.42, blue: 0.60, alpha: 1)
         tableView?.backgroundColor = .clear
         tableView?.separatorStyle = .none
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(false, animated: animated)
-        title = "My Timers"
+        title = ""
 
         viewModel.reload()
         tableView?.reloadData()
@@ -75,10 +85,11 @@ final class TimersListViewController: UIViewController {
         navigationController?.setNavigationBarHidden(false, animated: false)
         navigationController?.navigationBar.isHidden = false
         navigationController?.navigationBar.alpha = 1
-        title = "My Timers"
+        title = ""
     }
 
     @IBAction private func addNewTimerTapped(_ sender: UIButton) {
+        haptic.impactOccurred()
         let createVC = CreateTimerViewController()
         createVC.delegate = self
         createVC.availableEmojis = viewModel.availableEmojis
