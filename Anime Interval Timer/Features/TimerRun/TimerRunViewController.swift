@@ -111,6 +111,8 @@ final class TimerRunViewController: UIViewController {
         countdownTimer?.invalidate()
         countdownTimer = nil
         stopSwayAnimation()
+        confettiEmitter?.removeFromSuperlayer()
+        confettiEmitter = nil
     }
 
     private var hasReachedFinish = false
@@ -323,8 +325,8 @@ final class TimerRunViewController: UIViewController {
 
         for color in colors {
             let cell = CAEmitterCell()
-            cell.birthRate = 3
-            cell.lifetime = 6
+            cell.birthRate = 1.5
+            cell.lifetime = 3
             cell.velocity = 100
             cell.velocityRange = 40
             cell.emissionLongitude = .pi
@@ -340,8 +342,8 @@ final class TimerRunViewController: UIViewController {
         }
 
         let starCell = CAEmitterCell()
-        starCell.birthRate = 1
-        starCell.lifetime = 5
+        starCell.birthRate = 0.5
+        starCell.lifetime = 2.5
         starCell.velocity = 80
         starCell.velocityRange = 30
         starCell.emissionLongitude = .pi
@@ -360,6 +362,11 @@ final class TimerRunViewController: UIViewController {
         emitter.masksToBounds = false
         container.layer.addSublayer(emitter)
         confettiEmitter = emitter
+
+        // Stop spawning after short burst to avoid memory buildup
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            self?.confettiEmitter?.birthRate = 0
+        }
     }
 
     private func makeConfettiCGImage(color: UIColor) -> CGImage? {
