@@ -51,6 +51,11 @@ class ViewController: UIViewController {
         letsGoButton?.layer.shadowOpacity = 0.25
         letsGoButton?.addTarget(self, action: #selector(letsGoTouchDown), for: .touchDown)
         letsGoButton?.addTarget(self, action: #selector(letsGoTouchUp), for: [.touchUpInside, .touchUpOutside, .touchCancel])
+        letsGoButton?.addTarget(self, action: #selector(letsGoPlayAffirmSound), for: .touchUpInside)
+    }
+
+    @objc private func letsGoPlayAffirmSound() {
+        InteractionSuccessSound.playSuccesSecondAndThirdSeconds()
     }
 
     @objc private func letsGoTouchDown() {
@@ -68,6 +73,7 @@ class ViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        AppAmbientMusicController.shared.ensureAmbientForNonTimerScreen()
         startSwayAnimation()
     }
 

@@ -19,6 +19,11 @@ class OnboardingViewController: UIViewController {
         navigationController?.setNavigationBarHidden(true, animated: animated)
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AppAmbientMusicController.shared.ensureAmbientForNonTimerScreen()
+    }
+
 
 
     /*

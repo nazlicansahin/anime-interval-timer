@@ -83,6 +83,7 @@ final class TimerRunViewController: UIViewController {
     private let finishRomajiLabel = UILabel()
     private let finishEnglishLabel = UILabel()
     private var confettiEmitter: CAEmitterLayer?
+    private let sessionAudio = TimerRunAudioController()
 
     override func loadView() {
         view = UIView()
@@ -97,9 +98,19 @@ final class TimerRunViewController: UIViewController {
         resetToStart()
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if isMovingToParent || isBeingPresented {
+            AppAmbientMusicController.shared.beginTimerRunSession()
+        }
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        sessionAudio.activateSession()
+        sessionAudio.refreshVolumes()
         if !finishContainer.isHidden { return }
+        sessionAudio.syncMusic(phase: phase, timerKind: timer?.timerKind ?? .study)
         if !isRunning && !hasReachedFinish {
             startCountdown()
         }
@@ -113,9 +124,15 @@ final class TimerRunViewController: UIViewController {
         stopSwayAnimation()
         confettiEmitter?.removeFromSuperlayer()
         confettiEmitter = nil
+        sessionAudio.deactivateSession()
+        if isMovingFromParent || isBeingDismissed {
+            AppAmbientMusicController.shared.endTimerRunSession()
+        }
     }
 
     private var hasReachedFinish = false
+    /// One shot of 3scounter per start/focus/break segment when countdown hits 4s left.
+    private var playedLastFourSecondCounterThisSegment = false
 
     private func startSwayAnimation() {
         stopSwayAnimation()
@@ -423,12 +440,16 @@ final class TimerRunViewController: UIViewController {
         isRunning = false
         countdownTimer?.invalidate()
         finishContainer.isHidden = true
+        playedLastFourSecondCounterThisSegment = false
+        sessionAudio.stopAll()
+        sessionAudio.syncMusic(phase: .start, timerKind: timer?.timerKind ?? .study)
         updateUI()
         updateControlButton()
     }
 
     private func updateUI() {
-        titleLabel.text = timer?.title ?? "Timer"
+        let rawTitle = (timer?.title ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        titleLabel.text = rawTitle.isEmpty ? "Quick start" : (timer?.title ?? "Timer")
         phaseIconImageView.image = UIImage(named: phase.phaseIconImageName)
 
         bgImageView.image = UIImage(named: phase.bgImageName)
@@ -472,21 +493,31 @@ final class TimerRunViewController: UIViewController {
                 showFinish()
                 return
             }
+            sessionAudio.playTransitionSuccess()
             phase = .focus
             remainingSeconds = timer?.focusDuration ?? 0
         } else {
+            sessionAudio.playTransitionSuccess()
             phase = TimerPhase(rawValue: nextRaw) ?? .focus
             remainingSeconds = phaseDuration()
         }
+        sessionAudio.syncMusic(phase: phase, timerKind: timer?.timerKind ?? .study)
+        sessionAudio.refreshVolumes()
+        playedLastFourSecondCounterThisSegment = false
         updateUI()
         updateControlButton()
     }
 
     private func showFinish() {
+        if !playedLastFourSecondCounterThisSegment {
+            sessionAudio.playStartCounterTick()
+        }
         hasReachedFinish = true
         countdownTimer?.invalidate()
         countdownTimer = nil
         isRunning = false
+        sessionAudio.playTransitionSuccess()
+        sessionAudio.stopMusicOnly()
 
         titleLabel.isHidden = true
         phaseIconImageView.isHidden = true
@@ -539,11 +570,21 @@ final class TimerRunViewController: UIViewController {
     }
 
     private func tick() {
+        let countDownPhase = phase == .start || phase == .focus || phase == .break_
+        if isRunning && countDownPhase && !playedLastFourSecondCounterThisSegment && remainingSeconds == 4 {
+            playedLastFourSecondCounterThisSegment = true
+            sessionAudio.playStartCounterTick()
+        }
         remainingSeconds -= 1
         if remainingSeconds <= 0 {
             advancePhase()
             return
         }
+        if isRunning && countDownPhase && !playedLastFourSecondCounterThisSegment && remainingSeconds == 4 {
+            playedLastFourSecondCounterThisSegment = true
+            sessionAudio.playStartCounterTick()
+        }
+        sessionAudio.refreshVolumes()
         timerLabel.text = Self.format(seconds: remainingSeconds)
     }
 
@@ -562,6 +603,9 @@ final class TimerRunViewController: UIViewController {
                 remainingSeconds = timer?.startDuration ?? 0
             }
         }
+        playedLastFourSecondCounterThisSegment = false
+        sessionAudio.syncMusic(phase: phase, timerKind: timer?.timerKind ?? .study)
+        sessionAudio.refreshVolumes()
         updateUI()
         updateControlButton()
         startCountdown()

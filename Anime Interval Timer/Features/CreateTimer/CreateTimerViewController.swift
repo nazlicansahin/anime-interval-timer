@@ -3,11 +3,23 @@ import UIKit
 protocol CreateTimerViewControllerDelegate: AnyObject {
     func createTimerViewController(_ viewController: CreateTimerViewController, didCreate timer: AnimeTimer)
     func createTimerViewControllerDidCancel(_ viewController: CreateTimerViewController)
+    func createTimerViewController(_ viewController: CreateTimerViewController, didStartInstantTimer timer: AnimeTimer)
+    func createTimerViewController(_ viewController: CreateTimerViewController, didUpdate timer: AnimeTimer)
+}
+
+extension CreateTimerViewControllerDelegate {
+    func createTimerViewController(_ viewController: CreateTimerViewController, didStartInstantTimer timer: AnimeTimer) {}
+    func createTimerViewController(_ viewController: CreateTimerViewController, didUpdate timer: AnimeTimer) {}
 }
 
 final class CreateTimerViewController: UIViewController {
 
     // MARK: - Types
+
+    enum FlowKind {
+        case create
+        case instant
+    }
 
     enum TimerType: CaseIterable {
         case study
@@ -30,6 +42,9 @@ final class CreateTimerViewController: UIViewController {
 
     weak var delegate: CreateTimerViewControllerDelegate?
     var availableEmojis: [String] = ["⏳", "📚", "💪", "✨", "🔥", "🌸"]
+    var flowKind: FlowKind = .create
+    /// When set, screen acts as edit: fields prefilled, primary button saves in place.
+    var editingTimer: AnimeTimer?
     private var selectedType: TimerType = .study
 
     // MARK: - UI (built in code)
@@ -55,6 +70,8 @@ final class CreateTimerViewController: UIViewController {
     private let breakPlusBtn = UIButton(type: .system)
     private let cancelButton = UIButton(type: .system)
     private let createButton = UIButton(type: .system)
+    private let formSubtitleLabel = UILabel()
+    private weak var nameSectionContainer: UIView?
 
     // MARK: - Lifecycle
 
@@ -89,13 +106,22 @@ final class CreateTimerViewController: UIViewController {
         setupBackground()
         buildUI()
         setupActions()
-        setInitialValues()
+        if let original = editingTimer {
+            applyEditMode(original)
+        } else {
+            applyFlowKind()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        AppAmbientMusicController.shared.ensureAmbientForNonTimerScreen()
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -131,7 +157,7 @@ final class CreateTimerViewController: UIViewController {
     }
 
     private func scrollToActiveField() {
-        guard let firstResponder = view.findFirstResponder() as? UIView else { return }
+        guard let firstResponder = view.findFirstResponder() else { return }
         let rect = firstResponder.convert(firstResponder.bounds, to: scrollView)
         let targetRect = rect.insetBy(dx: 0, dy: -24)
         scrollView.scrollRectToVisible(targetRect, animated: true)
@@ -152,16 +178,17 @@ final class CreateTimerViewController: UIViewController {
         scrollView.addSubview(contentStack)
 
         // Subtitle
-        let subtitleLbl = UILabel()
-        subtitleLbl.text = "Design your perfect routine! 💪"
-        subtitleLbl.font = AppDesign.captionFont()
-        subtitleLbl.textColor = .secondaryLabel
-        subtitleLbl.textAlignment = .center
-        subtitleLbl.translatesAutoresizingMaskIntoConstraints = false
-        contentStack.addArrangedSubview(subtitleLbl)
+        formSubtitleLabel.text = "Design your perfect routine! 💪"
+        formSubtitleLabel.font = AppDesign.captionFont()
+        formSubtitleLabel.textColor = .secondaryLabel
+        formSubtitleLabel.textAlignment = .center
+        formSubtitleLabel.numberOfLines = 0
+        formSubtitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentStack.addArrangedSubview(formSubtitleLabel)
 
         // Timer Name
         let nameSection = makeSection(title: "✨ Timer Name", field: nameTextField)
+        nameSectionContainer = nameSection
         contentStack.addArrangedSubview(nameSection)
 
         // Timer Type
@@ -172,6 +199,7 @@ final class CreateTimerViewController: UIViewController {
 
         // Loops
         loopsTextField.keyboardType = .numberPad
+        loopsTextField.placeholder = "Required"
         let loopsSection = makeSection(title: "🔢 Number of Loops", field: loopsTextField)
         contentStack.addArrangedSubview(loopsSection)
 
@@ -180,7 +208,7 @@ final class CreateTimerViewController: UIViewController {
         focusLabel.text = "🎯 Focus"
         breakLabel.text = "☕ Break"
         [startTextField, focusTextField, breakTextField].forEach {
-            $0.keyboardType = .numbersAndPunctuation
+            $0.keyboardType = .numberPad
             $0.borderStyle = .none
             $0.textAlignment = .center
             $0.font = AppDesign.bodyFont()
@@ -357,10 +385,39 @@ final class CreateTimerViewController: UIViewController {
         breakPlusBtn.addTarget(self, action: #selector(stepperBreakPlus), for: .touchUpInside)
     }
 
-    private func setInitialValues() {
+    private func applyEditMode(_ original: AnimeTimer) {
+        formSubtitleLabel.text = "Update your routine ✨"
+        nameSectionContainer?.isHidden = false
+        createButton.configuration?.title = "Save ✨"
+        nameTextField.text = original.title
+        loopsTextField.text = "\(original.loopsCount ?? 1)"
+        startTextField.text = Self.format(seconds: original.startDuration)
+        focusTextField.text = Self.format(seconds: original.focusDuration)
+        breakTextField.text = Self.format(seconds: original.breakDuration)
+        selectedType = original.timerKind == .workout ? .workout : .study
+        timerTypeButton.setTitle(selectedType.title, for: .normal)
+    }
+
+    private func applyFlowKind() {
+        switch flowKind {
+        case .create:
+            setInitialValuesCreate()
+        case .instant:
+            formSubtitleLabel.text = "Quick start — change times if you want ⚡️"
+            nameSectionContainer?.isHidden = true
+            createButton.configuration?.title = "Start ✨"
+            loopsTextField.text = "1"
+            startTextField.text = Self.format(seconds: 5)
+            focusTextField.text = "00:30"
+            breakTextField.text = "00:30"
+        }
+    }
+
+    private func setInitialValuesCreate() {
         startTextField.text = "00:00"
         focusTextField.text = "00:30"
         breakTextField.text = "00:30"
+        loopsTextField.text = ""
     }
 
     @objc private func dismissKeyboard() { view.endEditing(true) }
@@ -371,13 +428,58 @@ final class CreateTimerViewController: UIViewController {
     }
 
     @objc private func createTapped() {
-        let title = (nameTextField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
-        let name = title.isEmpty ? "My Timer" : title
-        let loops = Int((loopsTextField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines))
-        let start = Self.parseDurationToSeconds(startTextField.text) ?? 0
+        let loopsTrimmed = (loopsTextField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let loops = Int(loopsTrimmed), loops > 0 else {
+            presentValidationAlert(title: "Loops required", message: "Enter how many times the routine should repeat (1 or more).")
+            return
+        }
+
+        let start = Self.parseDurationToSeconds(startTextField.text) ?? (flowKind == .instant ? 5 : 0)
         let focus = Self.parseDurationToSeconds(focusTextField.text) ?? 0
         let brk = Self.parseDurationToSeconds(breakTextField.text) ?? 0
         let emoji = availableEmojis.randomElement() ?? "⏳"
+
+        if flowKind == .instant {
+            let timer = AnimeTimer(
+                id: UUID(),
+                title: "",
+                loopsCount: loops,
+                startDuration: start,
+                focusDuration: focus,
+                breakDuration: brk,
+                emoji: emoji,
+                usageCount: 0,
+                createdAt: Date(),
+                timerKind: selectedType.kind
+            )
+            // Delegate pops this screen then pushes timer run — do not pop here or the timer VC gets popped.
+            delegate?.createTimerViewController(self, didStartInstantTimer: timer)
+            return
+        }
+
+        let title = (nameTextField.text ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        let name = title.isEmpty ? "My Timer" : title
+
+        if let original = editingTimer {
+            InteractionSuccessSound.playSuccesSecondAndThirdSeconds()
+            let updated = AnimeTimer(
+                id: original.id,
+                title: name,
+                loopsCount: loops,
+                startDuration: start,
+                focusDuration: focus,
+                breakDuration: brk,
+                emoji: original.emoji,
+                usageCount: original.usageCount,
+                createdAt: original.createdAt,
+                timerKind: selectedType.kind
+            )
+            delegate?.createTimerViewController(self, didUpdate: updated)
+            navigationController?.popViewController(animated: true)
+            return
+        }
+
+        InteractionSuccessSound.playSuccesSecondAndThirdSeconds()
 
         let timer = AnimeTimer(
             id: UUID(),
@@ -393,6 +495,12 @@ final class CreateTimerViewController: UIViewController {
         )
         delegate?.createTimerViewController(self, didCreate: timer)
         navigationController?.popViewController(animated: true)
+    }
+
+    private func presentValidationAlert(title: String, message: String) {
+        let a = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        a.addAction(UIAlertAction(title: "OK", style: .default))
+        present(a, animated: true)
     }
 
     @objc private func stepperStartMinus() { adjust(startTextField, by: -10) }
@@ -415,7 +523,7 @@ final class CreateTimerViewController: UIViewController {
             guard p.count == 2 else { return nil }
             return TimeInterval((Int(p[0]) ?? 0) * 60 + (Int(p[1]) ?? 0))
         }
-        return TimeInterval((Int(t) ?? 0) * 60)
+        return TimeInterval(Int(t) ?? 0)
     }
 
     private static func format(seconds: TimeInterval) -> String {

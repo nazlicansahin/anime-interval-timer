@@ -86,6 +86,20 @@ final class TimersListViewModel {
         sortTimers()
     }
 
+    /// Full model for editing (same order as `timer(at:)` display index).
+    func storedTimer(at index: Int) -> AnimeTimer? {
+        guard timers.indices.contains(index) else { return nil }
+        return timers[index]
+    }
+
+    /// Persists changes to an existing timer (same `id`).
+    func updateExistingTimer(_ timer: AnimeTimer) {
+        guard let index = timers.firstIndex(where: { $0.id == timer.id }) else { return }
+        timers[index] = timer
+        storage.update(timer)
+        sortTimers()
+    }
+
     // MARK: - Helpers
 
     private func sortTimers() {

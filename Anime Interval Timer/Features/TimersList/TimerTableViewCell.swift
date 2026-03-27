@@ -18,6 +18,7 @@ final class TimerTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
         super.awakeFromNib()
+        selectionStyle = .default
         backgroundColor = .clear
         contentView.backgroundColor = UIColor(red: 1, green: 0.98, blue: 0.99, alpha: 0.95)
         contentView.layer.cornerRadius = AppDesign.cornerRadiusCard
@@ -55,6 +56,7 @@ final class TimerTableViewCell: UITableViewCell {
     }
 
     @IBAction private func startTapped(_ sender: UIButton) {
+        InteractionSuccessSound.playSuccesSecondAndThirdSeconds()
         onTapStart?()
     }
 }
