@@ -1,13 +1,11 @@
 import Foundation
 
-// MARK: - Model
-
 enum TimerKind: String, Codable, CaseIterable {
     case study
     case workout
 }
 
-struct AnimeTimer: Codable, Identifiable, Equatable {
+struct AnimeTimer: Codable, Identifiable, Equatable, Hashable {
     let id: UUID
     var title: String
     var loopsCount: Int?
@@ -20,10 +18,20 @@ struct AnimeTimer: Codable, Identifiable, Equatable {
     var usageCount: Int
     let createdAt: Date
 
-    /// study or workout — determines which anime girl set to show.
     var timerKind: TimerKind
 
-    init(id: UUID, title: String, loopsCount: Int?, startDuration: TimeInterval, focusDuration: TimeInterval, breakDuration: TimeInterval, emoji: String, usageCount: Int, createdAt: Date, timerKind: TimerKind = .study) {
+    init(
+        id: UUID,
+        title: String,
+        loopsCount: Int?,
+        startDuration: TimeInterval,
+        focusDuration: TimeInterval,
+        breakDuration: TimeInterval,
+        emoji: String,
+        usageCount: Int,
+        createdAt: Date,
+        timerKind: TimerKind = .study
+    ) {
         self.id = id
         self.title = title
         self.loopsCount = loopsCount
@@ -68,77 +76,3 @@ struct AnimeTimer: Codable, Identifiable, Equatable {
         case id, title, loopsCount, startDuration, focusDuration, breakDuration, emoji, usageCount, createdAt, timerKind
     }
 }
-
-// MARK: - Storage abstraction
-
-protocol TimersStoring {
-    func loadTimers() -> [AnimeTimer]
-    func saveTimers(_ timers: [AnimeTimer])
-
-    func add(_ timer: AnimeTimer)
-    func update(_ timer: AnimeTimer)
-    func delete(id: UUID)
-}
-
-// MARK: - UserDefaults implementation
-
-final class UserDefaultsTimersStorage: TimersStoring {
-
-    private enum Keys {
-        static let timers = "anime_interval_timer.timers"
-    }
-
-    private let userDefaults: UserDefaults
-    private let decoder = JSONDecoder()
-    private let encoder = JSONEncoder()
-
-    init(userDefaults: UserDefaults = .standard) {
-        self.userDefaults = userDefaults
-    }
-
-    func loadTimers() -> [AnimeTimer] {
-        guard let data = userDefaults.data(forKey: Keys.timers) else {
-            return []
-        }
-
-        do {
-            let timers = try decoder.decode([AnimeTimer].self, from: data)
-            return timers
-        } catch {
-            // If decoding fails, clear corrupted data and start fresh.
-            userDefaults.removeObject(forKey: Keys.timers)
-            return []
-        }
-    }
-
-    func saveTimers(_ timers: [AnimeTimer]) {
-        do {
-            let data = try encoder.encode(timers)
-            userDefaults.set(data, forKey: Keys.timers)
-        } catch {
-            // In a simple local app we can silently fail; in the future we may want logging.
-        }
-    }
-
-    func add(_ timer: AnimeTimer) {
-        var timers = loadTimers()
-        timers.append(timer)
-        saveTimers(timers)
-    }
-
-    func update(_ timer: AnimeTimer) {
-        var timers = loadTimers()
-        guard let index = timers.firstIndex(where: { $0.id == timer.id }) else {
-            return
-        }
-        timers[index] = timer
-        saveTimers(timers)
-    }
-
-    func delete(id: UUID) {
-        var timers = loadTimers()
-        timers.removeAll { $0.id == id }
-        saveTimers(timers)
-    }
-}
-

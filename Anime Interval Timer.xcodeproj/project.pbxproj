@@ -6,6 +6,11 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		6CAA000F2F5000010065E1C2 /* Anime Interval Timer Widget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 6CAA00022F5000010065E1C2 /* Anime Interval Timer Widget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		6CBB000F2F6000010065E1C2 /* Anime Interval Timer Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 6CBB00022F6000010065E1C2 /* Anime Interval Timer Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		6C1C36402F3525340065E1C2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -21,12 +26,53 @@
 			remoteGlobalIDString = 6C1C36252F3525330065E1C2;
 			remoteInfo = "Anime Interval Timer";
 		};
+		6CAA000C2F5000010065E1C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6C1C361E2F3525320065E1C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6CAA00012F5000010065E1C2;
+			remoteInfo = "Anime Interval Timer Widget";
+		};
+		6CBB000C2F6000010065E1C2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 6C1C361E2F3525320065E1C2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6CBB00012F6000010065E1C2;
+			remoteInfo = "Anime Interval Timer Watch App";
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		6CAA000A2F5000010065E1C2 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				6CAA000F2F5000010065E1C2 /* Anime Interval Timer Widget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6CBB000A2F6000010065E1C2 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				6CBB000F2F6000010065E1C2 /* Anime Interval Timer Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		6C1C36262F3525330065E1C2 /* Anime Interval Timer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Anime Interval Timer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C1C363F2F3525340065E1C2 /* Anime Interval TimerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Anime Interval TimerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		6C1C36492F3525340065E1C2 /* Anime Interval TimerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Anime Interval TimerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6CAA00022F5000010065E1C2 /* Anime Interval Timer Widget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Anime Interval Timer Widget.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		6CBB00022F6000010065E1C2 /* Anime Interval Timer Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Anime Interval Timer Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -51,6 +97,20 @@
 			);
 			target = 6C1C36482F3525340065E1C2 /* Anime Interval TimerUITests */;
 		};
+		6CAA000D2F5000010065E1C2 /* Exceptions for "Anime Interval Timer Widget" folder in "Anime Interval Timer Widget" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 6CAA00012F5000010065E1C2 /* Anime Interval Timer Widget */;
+		};
+		6CBB000E2F6000010065E1C2 /* Exceptions for "Shared" folder in "Anime Interval Timer Watch App" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				TimerActivityAttributes.swift,
+			);
+			target = 6CBB00012F6000010065E1C2 /* Anime Interval Timer Watch App */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -72,6 +132,27 @@
 		6C1C364C2F3525340065E1C2 /* Anime Interval TimerUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "Anime Interval TimerUITests";
+			sourceTree = "<group>";
+		};
+		6CAA00032F5000010065E1C2 /* Anime Interval Timer Widget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6CAA000D2F5000010065E1C2 /* Exceptions for "Anime Interval Timer Widget" folder in "Anime Interval Timer Widget" target */,
+			);
+			path = "Anime Interval Timer Widget";
+			sourceTree = "<group>";
+		};
+		6CAA00102F5000010065E1C2 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				6CBB000E2F6000010065E1C2 /* Exceptions for "Shared" folder in "Anime Interval Timer Watch App" target */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		6CBB00032F6000010065E1C2 /* Anime Interval Timer Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "Anime Interval Timer Watch App";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -98,6 +179,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6CAA00052F5000010065E1C2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6CBB00052F6000010065E1C2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -105,6 +200,9 @@
 			isa = PBXGroup;
 			children = (
 				6C1C36282F3525330065E1C2 /* Anime Interval Timer */,
+				6CAA00032F5000010065E1C2 /* Anime Interval Timer Widget */,
+				6CBB00032F6000010065E1C2 /* Anime Interval Timer Watch App */,
+				6CAA00102F5000010065E1C2 /* Shared */,
 				6C1C36422F3525340065E1C2 /* Anime Interval TimerTests */,
 				6C1C364C2F3525340065E1C2 /* Anime Interval TimerUITests */,
 				6C1C36272F3525330065E1C2 /* Products */,
@@ -116,6 +214,8 @@
 			isa = PBXGroup;
 			children = (
 				6C1C36262F3525330065E1C2 /* Anime Interval Timer.app */,
+				6CAA00022F5000010065E1C2 /* Anime Interval Timer Widget.appex */,
+				6CBB00022F6000010065E1C2 /* Anime Interval Timer Watch App.app */,
 				6C1C363F2F3525340065E1C2 /* Anime Interval TimerTests.xctest */,
 				6C1C36492F3525340065E1C2 /* Anime Interval TimerUITests.xctest */,
 			);
@@ -132,13 +232,18 @@
 				6C1C36222F3525330065E1C2 /* Sources */,
 				6C1C36232F3525330065E1C2 /* Frameworks */,
 				6C1C36242F3525330065E1C2 /* Resources */,
+				6CAA000A2F5000010065E1C2 /* Embed Foundation Extensions */,
+				6CBB000A2F6000010065E1C2 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				6CAA000B2F5000010065E1C2 /* PBXTargetDependency */,
+				6CBB000B2F6000010065E1C2 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6C1C36282F3525330065E1C2 /* Anime Interval Timer */,
+				6CAA00102F5000010065E1C2 /* Shared */,
 			);
 			name = "Anime Interval Timer";
 			packageProductDependencies = (
@@ -193,6 +298,52 @@
 			productReference = 6C1C36492F3525340065E1C2 /* Anime Interval TimerUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		6CAA00012F5000010065E1C2 /* Anime Interval Timer Widget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6CAA00072F5000010065E1C2 /* Build configuration list for PBXNativeTarget "Anime Interval Timer Widget" */;
+			buildPhases = (
+				6CAA00042F5000010065E1C2 /* Sources */,
+				6CAA00052F5000010065E1C2 /* Frameworks */,
+				6CAA00062F5000010065E1C2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6CAA00032F5000010065E1C2 /* Anime Interval Timer Widget */,
+				6CAA00102F5000010065E1C2 /* Shared */,
+			);
+			name = "Anime Interval Timer Widget";
+			packageProductDependencies = (
+			);
+			productName = "Anime Interval Timer Widget";
+			productReference = 6CAA00022F5000010065E1C2 /* Anime Interval Timer Widget.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		6CBB00012F6000010065E1C2 /* Anime Interval Timer Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6CBB00072F6000010065E1C2 /* Build configuration list for PBXNativeTarget "Anime Interval Timer Watch App" */;
+			buildPhases = (
+				6CBB00042F6000010065E1C2 /* Sources */,
+				6CBB00052F6000010065E1C2 /* Frameworks */,
+				6CBB00062F6000010065E1C2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				6CAA00102F5000010065E1C2 /* Shared */,
+				6CBB00032F6000010065E1C2 /* Anime Interval Timer Watch App */,
+			);
+			name = "Anime Interval Timer Watch App";
+			packageProductDependencies = (
+			);
+			productName = "Anime Interval Timer Watch App";
+			productReference = 6CBB00022F6000010065E1C2 /* Anime Interval Timer Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -231,6 +382,8 @@
 			projectRoot = "";
 			targets = (
 				6C1C36252F3525330065E1C2 /* Anime Interval Timer */,
+				6CAA00012F5000010065E1C2 /* Anime Interval Timer Widget */,
+				6CBB00012F6000010065E1C2 /* Anime Interval Timer Watch App */,
 				6C1C363E2F3525340065E1C2 /* Anime Interval TimerTests */,
 				6C1C36482F3525340065E1C2 /* Anime Interval TimerUITests */,
 			);
@@ -253,6 +406,20 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		6C1C36472F3525340065E1C2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6CAA00062F5000010065E1C2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6CBB00062F6000010065E1C2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -283,6 +450,20 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		6CAA00042F5000010065E1C2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6CBB00042F6000010065E1C2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -296,6 +477,16 @@
 			target = 6C1C36252F3525330065E1C2 /* Anime Interval Timer */;
 			targetProxy = 6C1C364A2F3525340065E1C2 /* PBXContainerItemProxy */;
 		};
+		6CAA000B2F5000010065E1C2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6CAA00012F5000010065E1C2 /* Anime Interval Timer Widget */;
+			targetProxy = 6CAA000C2F5000010065E1C2 /* PBXContainerItemProxy */;
+		};
+		6CBB000B2F6000010065E1C2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6CBB00012F6000010065E1C2 /* Anime Interval Timer Watch App */;
+			targetProxy = 6CBB000C2F6000010065E1C2 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -304,11 +495,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Anime Interval Timer/Anime Interval Timer.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = TZZHL8ZKXL;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Anime Interval Timer/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "anime interval timer";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -318,7 +512,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "dev.nazlican.Anime-Interval-Timer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -339,11 +533,14 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Anime Interval Timer/Anime Interval Timer.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = TZZHL8ZKXL;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Anime Interval Timer/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "anime interval timer";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -353,7 +550,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "dev.nazlican.Anime-Interval-Timer";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -574,6 +771,116 @@
 			};
 			name = Release;
 		};
+		6CAA00082F5000010065E1C2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = TZZHL8ZKXL;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Anime Interval Timer Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Anime Interval Timer Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.nazlican.Anime-Interval-Timer.widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		6CAA00092F5000010065E1C2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = TZZHL8ZKXL;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Anime Interval Timer Widget/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Anime Interval Timer Widget";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.nazlican.Anime-Interval-Timer.widget";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		6CBB00082F6000010065E1C2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Anime Interval Timer Watch App/Anime Interval Timer Watch App.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = TZZHL8ZKXL;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Anime Timer";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "dev.nazlican.Anime-Interval-Timer";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.nazlican.Anime-Interval-Timer.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Debug;
+		};
+		6CBB00092F6000010065E1C2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = "Anime Interval Timer Watch App/Anime Interval Timer Watch App.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = TZZHL8ZKXL;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "Anime Timer";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = "dev.nazlican.Anime-Interval-Timer";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = "dev.nazlican.Anime-Interval-Timer.watchkitapp";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -609,6 +916,24 @@
 			buildConfigurations = (
 				6C1C365B2F3525340065E1C2 /* Debug */,
 				6C1C365C2F3525340065E1C2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6CAA00072F5000010065E1C2 /* Build configuration list for PBXNativeTarget "Anime Interval Timer Widget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6CAA00082F5000010065E1C2 /* Debug */,
+				6CAA00092F5000010065E1C2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6CBB00072F6000010065E1C2 /* Build configuration list for PBXNativeTarget "Anime Interval Timer Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6CBB00082F6000010065E1C2 /* Debug */,
+				6CBB00092F6000010065E1C2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

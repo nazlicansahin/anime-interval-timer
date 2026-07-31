@@ -77,7 +77,7 @@ final class CreateTimerViewController: UIViewController {
 
     override func loadView() {
         view = UIView()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = AppDesign.formSectionBackground
     }
 
     private func setupBackground() {
@@ -180,7 +180,7 @@ final class CreateTimerViewController: UIViewController {
         // Subtitle
         formSubtitleLabel.text = "Design your perfect routine! 💪"
         formSubtitleLabel.font = AppDesign.captionFont()
-        formSubtitleLabel.textColor = .secondaryLabel
+        formSubtitleLabel.textColor = AppDesign.secondaryText
         formSubtitleLabel.textAlignment = .center
         formSubtitleLabel.numberOfLines = 0
         formSubtitleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -306,7 +306,7 @@ final class CreateTimerViewController: UIViewController {
         let lbl = UILabel()
         lbl.text = title
         lbl.font = AppDesign.bodyFont()
-        lbl.textColor = .label
+        lbl.textColor = AppDesign.primaryText
         field.translatesAutoresizingMaskIntoConstraints = false
         lbl.translatesAutoresizingMaskIntoConstraints = false
         v.addSubview(lbl)
@@ -328,7 +328,7 @@ final class CreateTimerViewController: UIViewController {
             tf.font = AppDesign.bodyFont()
             tf.borderStyle = .none
             tf.layer.cornerRadius = AppDesign.cornerRadiusSmall
-            tf.backgroundColor = UIColor.secondarySystemBackground.withAlphaComponent(0.6)
+            tf.backgroundColor = AppDesign.formFieldBackground
         }
         if let btn = field as? UIButton {
             btn.titleLabel?.font = AppDesign.bodyFont()

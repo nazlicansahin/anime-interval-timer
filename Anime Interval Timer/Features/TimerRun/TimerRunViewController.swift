@@ -1,47 +1,11 @@
 import UIKit
 
-enum TimerPhase: Int, CaseIterable {
-    case start = 0
-    case focus = 1
-    case break_ = 2
-
-    var bgImageName: String {
-        switch self {
-        case .start: return "bg-green"
-        case .focus: return "bg-pink"
-        case .break_: return "bg-blue"
-        }
-    }
-
+extension TimerPhase {
     var animeImageName: (study: String, workout: String) {
         switch self {
         case .start: return ("start-study", "start-workout")
         case .focus: return ("focus-study", "focus-workout")
         case .break_: return ("break-study", "break-workout")
-        }
-    }
-
-    var stateTitle: (japanese: String, english: String) {
-        switch self {
-        case .start: return ("準備できた？先輩", "Ready, Senpai?")
-        case .focus: return ("できるよ！先輩", "You can do it, Senpai!")
-        case .break_: return ("休憩だよ、先輩", "Break time, Senpai!")
-        }
-    }
-
-    var startBtnImageName: String {
-        switch self {
-        case .start: return "start-btn-green"
-        case .focus: return "start-btn-pink"
-        case .break_: return "start-btn-blue"
-        }
-    }
-
-    var stopBtnImageName: String {
-        switch self {
-        case .start: return "stop-btn-green"
-        case .focus: return "stop-btn-pink"
-        case .break_: return "stop-btn-blue"
         }
     }
 
@@ -61,6 +25,7 @@ final class TimerRunViewController: UIViewController {
     private var phase: TimerPhase = .start
     private var currentLoop: Int = 0
     private var remainingSeconds: TimeInterval = 0
+    private var segmentEndDate: Date?
     private var isRunning = false
     private var hasCompletedStart = false
     private var countdownTimer: Timer?
@@ -68,11 +33,10 @@ final class TimerRunViewController: UIViewController {
     private let contentStack = UIStackView()
     private let bgImageView = UIImageView()
     private let titleLabel = UILabel()
+    private let loopLabel = UILabel()
     private let phaseIconImageView = UIImageView()
     private let animeImageView = UIImageView()
     private let timerLabel = UILabel()
-    private let stateLabel = UILabel()
-    private let stateEnglishLabel = UILabel()
     private let prevTourButton = UIButton(type: .custom)
     private let controlButton = UIButton(type: .custom)
     private let nextTourButton = UIButton(type: .custom)
@@ -84,6 +48,8 @@ final class TimerRunViewController: UIViewController {
     private let finishEnglishLabel = UILabel()
     private var confettiEmitter: CAEmitterLayer?
     private let sessionAudio = TimerRunAudioController()
+    private let liveActivity = TimerLiveActivityManager()
+    private var foregroundObserver: NSObjectProtocol?
 
     override func loadView() {
         view = UIView()
@@ -96,6 +62,62 @@ final class TimerRunViewController: UIViewController {
         buildUI()
         buildFinishUI()
         resetToStart()
+        foregroundObserver = NotificationCenter.default.addObserver(
+            forName: UIApplication.willEnterForegroundNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.syncFromClock()
+        }
+        watchCancelObserver = NotificationCenter.default.addObserver(
+            forName: .watchRequestedCancelTimer,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.handleWatchCancelRequest()
+        }
+        watchCommandObserver = NotificationCenter.default.addObserver(
+            forName: .watchTimerCommand,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let raw = notification.userInfo?[TimerSyncContextKey.timerCommand] as? String,
+                  let command = WatchTimerCommand(rawValue: raw) else { return }
+            self?.handleWatchCommand(command)
+        }
+    }
+
+    deinit {
+        if let foregroundObserver {
+            NotificationCenter.default.removeObserver(foregroundObserver)
+        }
+        if let watchCancelObserver {
+            NotificationCenter.default.removeObserver(watchCancelObserver)
+        }
+        if let watchCommandObserver {
+            NotificationCenter.default.removeObserver(watchCommandObserver)
+        }
+    }
+
+    private var watchCancelObserver: NSObjectProtocol?
+    private var watchCommandObserver: NSObjectProtocol?
+
+    private func handleWatchCommand(_ command: WatchTimerCommand) {
+        switch command {
+        case .toggleRunning:
+            controlTapped()
+        case .previousPhase:
+            prevTourTapped()
+        case .nextPhase:
+            nextTourTapped()
+        case .cancel:
+            handleWatchCancelRequest()
+        }
+    }
+
+    private func handleWatchCancelRequest() {
+        stopCountdown()
+        navigationController?.popViewController(animated: true)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -124,6 +146,8 @@ final class TimerRunViewController: UIViewController {
         stopSwayAnimation()
         confettiEmitter?.removeFromSuperlayer()
         confettiEmitter = nil
+        liveActivity.end(immediate: true)
+        PhoneWatchConnectivity.shared.clearActiveSession()
         sessionAudio.deactivateSession()
         if isMovingFromParent || isBeingDismissed {
             AppAmbientMusicController.shared.endTimerRunSession()
@@ -161,7 +185,14 @@ final class TimerRunViewController: UIViewController {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.textAlignment = .center
         titleLabel.font = .systemFont(ofSize: 20)
+        titleLabel.textColor = AppDesign.primaryText
         view.addSubview(titleLabel)
+
+        loopLabel.translatesAutoresizingMaskIntoConstraints = false
+        loopLabel.textAlignment = .center
+        loopLabel.font = AppDesign.captionFont()
+        loopLabel.textColor = .black
+        view.addSubview(loopLabel)
 
         phaseIconImageView.translatesAutoresizingMaskIntoConstraints = false
         phaseIconImageView.contentMode = .scaleAspectFit
@@ -173,29 +204,11 @@ final class TimerRunViewController: UIViewController {
 
         timerLabel.translatesAutoresizingMaskIntoConstraints = false
         timerLabel.textAlignment = .center
-        timerLabel.font = .systemFont(ofSize: 37)
+        timerLabel.font = .monospacedDigitSystemFont(ofSize: 64, weight: .semibold)
+        timerLabel.textColor = AppDesign.primaryText
+        timerLabel.adjustsFontSizeToFitWidth = true
+        timerLabel.minimumScaleFactor = 0.6
         view.addSubview(timerLabel)
-
-        stateLabel.translatesAutoresizingMaskIntoConstraints = false
-        stateLabel.textAlignment = .center
-        stateLabel.font = AppDesign.roundedFont(size: 20, weight: .medium)
-        stateLabel.textColor = .white
-        stateLabel.layer.shadowColor = UIColor.black.cgColor
-        stateLabel.layer.shadowOffset = CGSize(width: 0, height: 1)
-        stateLabel.layer.shadowRadius = 2
-        stateLabel.layer.shadowOpacity = 0.5
-        stateLabel.numberOfLines = 0
-        view.addSubview(stateLabel)
-
-        stateEnglishLabel.translatesAutoresizingMaskIntoConstraints = false
-        stateEnglishLabel.textAlignment = .center
-        stateEnglishLabel.font = AppDesign.captionFont()
-        stateEnglishLabel.textColor = UIColor.white.withAlphaComponent(0.9)
-        stateEnglishLabel.layer.shadowColor = UIColor.black.cgColor
-        stateEnglishLabel.layer.shadowOffset = CGSize(width: 0, height: 1)
-        stateEnglishLabel.layer.shadowRadius = 1
-        stateEnglishLabel.layer.shadowOpacity = 0.4
-        view.addSubview(stateEnglishLabel)
 
         let btnStack = UIStackView(arrangedSubviews: [prevTourButton, controlButton, nextTourButton])
         btnStack.axis = .horizontal
@@ -232,7 +245,11 @@ final class TimerRunViewController: UIViewController {
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 
-            phaseIconImageView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
+            loopLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            loopLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            loopLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
+
+            phaseIconImageView.topAnchor.constraint(equalTo: loopLabel.bottomAnchor, constant: 12),
             phaseIconImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             phaseIconImageView.widthAnchor.constraint(equalToConstant: 49),
             phaseIconImageView.heightAnchor.constraint(equalToConstant: 49),
@@ -242,26 +259,20 @@ final class TimerRunViewController: UIViewController {
             animeImageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -72),
             animeImageView.heightAnchor.constraint(equalToConstant: 318),
 
-            timerLabel.topAnchor.constraint(equalTo: animeImageView.bottomAnchor, constant: 16),
+            timerLabel.topAnchor.constraint(equalTo: animeImageView.bottomAnchor, constant: 12),
+            timerLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
+            timerLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             timerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
 
-            btnStack.topAnchor.constraint(equalTo: timerLabel.bottomAnchor, constant: 16),
+            btnStack.topAnchor.constraint(equalTo: timerLabel.bottomAnchor, constant: 20),
             btnStack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            btnStack.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             prevTourButton.widthAnchor.constraint(equalToConstant: 80),
             prevTourButton.heightAnchor.constraint(equalToConstant: 80),
             controlButton.widthAnchor.constraint(equalToConstant: 100),
             controlButton.heightAnchor.constraint(equalToConstant: 100),
             nextTourButton.widthAnchor.constraint(equalToConstant: 80),
             nextTourButton.heightAnchor.constraint(equalToConstant: 80),
-
-            stateLabel.topAnchor.constraint(equalTo: btnStack.bottomAnchor, constant: 16),
-            stateLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            stateLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            stateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-
-            stateEnglishLabel.topAnchor.constraint(equalTo: stateLabel.bottomAnchor, constant: 4),
-            stateEnglishLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            stateEnglishLabel.bottomAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.bottomAnchor),
         ])
     }
 
@@ -437,6 +448,7 @@ final class TimerRunViewController: UIViewController {
         hasCompletedStart = false
         let duration = timer?.startDuration ?? 0
         remainingSeconds = duration
+        segmentEndDate = nil
         isRunning = false
         countdownTimer?.invalidate()
         finishContainer.isHidden = true
@@ -445,6 +457,29 @@ final class TimerRunViewController: UIViewController {
         sessionAudio.syncMusic(phase: .start, timerKind: timer?.timerKind ?? .study)
         updateUI()
         updateControlButton()
+        syncLiveActivity()
+        syncWatchSession()
+    }
+
+    private func syncWatchSession() {
+        guard let timer else {
+            PhoneWatchConnectivity.shared.clearActiveSession()
+            return
+        }
+        guard !hasReachedFinish else {
+            PhoneWatchConnectivity.shared.clearActiveSession()
+            return
+        }
+        let session = ActiveTimerSession(
+            timer: timer,
+            phaseRawValue: phase.rawValue,
+            currentLoop: currentLoop,
+            remainingSeconds: remainingSeconds,
+            segmentEndDate: segmentEndDate,
+            isRunning: isRunning,
+            isFinished: false
+        )
+        PhoneWatchConnectivity.shared.updateActiveSession(session)
     }
 
     private func updateUI() {
@@ -458,9 +493,13 @@ final class TimerRunViewController: UIViewController {
         animeImageView.image = UIImage(named: imgName)
 
         timerLabel.text = Self.format(seconds: remainingSeconds)
-        let state = phase.stateTitle
-        stateLabel.text = state.japanese
-        stateEnglishLabel.text = state.english
+        loopLabel.text = loopProgressText()
+    }
+
+    private func loopProgressText() -> String {
+        let total = max(1, timer?.loopsCount ?? 1)
+        let current = min(currentLoop + 1, total)
+        return "Round \(current)/\(total)"
     }
 
     private func updateControlButton() {
@@ -504,8 +543,35 @@ final class TimerRunViewController: UIViewController {
         sessionAudio.syncMusic(phase: phase, timerKind: timer?.timerKind ?? .study)
         sessionAudio.refreshVolumes()
         playedLastFourSecondCounterThisSegment = false
+        if isRunning {
+            segmentEndDate = Date().addingTimeInterval(remainingSeconds)
+        }
         updateUI()
         updateControlButton()
+        syncLiveActivity()
+        syncWatchSession()
+    }
+
+    private func timerTitleText() -> String {
+        let rawTitle = (timer?.title ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return rawTitle.isEmpty ? "Quick start" : rawTitle
+    }
+
+    private func livePhaseTitle() -> String {
+        phase.englishTitle
+    }
+
+    private func syncLiveActivity() {
+        guard !hasReachedFinish else {
+            liveActivity.end(immediate: true)
+            return
+        }
+        liveActivity.sync(
+            timerTitle: timerTitleText(),
+            phaseTitle: livePhaseTitle(),
+            remainingSeconds: Int(ceil(remainingSeconds)),
+            isRunning: isRunning
+        )
     }
 
     private func showFinish() {
@@ -513,18 +579,20 @@ final class TimerRunViewController: UIViewController {
             sessionAudio.playStartCounterTick()
         }
         hasReachedFinish = true
+        segmentEndDate = nil
         countdownTimer?.invalidate()
         countdownTimer = nil
         isRunning = false
+        liveActivity.end(immediate: true)
+        PhoneWatchConnectivity.shared.clearActiveSession()
         sessionAudio.playTransitionSuccess()
         sessionAudio.stopMusicOnly()
 
         titleLabel.isHidden = true
+        loopLabel.isHidden = true
         phaseIconImageView.isHidden = true
-        stateEnglishLabel.isHidden = true
         animeImageView.isHidden = true
         timerLabel.isHidden = true
-        stateLabel.isHidden = true
         prevTourButton.isHidden = true
         controlButton.isHidden = true
         nextTourButton.isHidden = true
@@ -546,19 +614,29 @@ final class TimerRunViewController: UIViewController {
     private func startCountdown() {
         guard !isRunning else { return }
         isRunning = true
+        segmentEndDate = Date().addingTimeInterval(remainingSeconds)
         countdownTimer?.invalidate()
         countdownTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             self?.tick()
         }
         RunLoop.main.add(countdownTimer!, forMode: .common)
         updateControlButton()
+        syncLiveActivity()
+        syncWatchSession()
     }
 
     private func stopCountdown() {
+        if let end = segmentEndDate {
+            remainingSeconds = max(0, end.timeIntervalSinceNow)
+        }
         isRunning = false
+        segmentEndDate = nil
         countdownTimer?.invalidate()
         countdownTimer = nil
         updateControlButton()
+        timerLabel.text = Self.format(seconds: remainingSeconds)
+        syncLiveActivity()
+        syncWatchSession()
     }
 
     @objc private func controlTapped() {
@@ -569,23 +647,45 @@ final class TimerRunViewController: UIViewController {
         }
     }
 
-    private func tick() {
-        let countDownPhase = phase == .start || phase == .focus || phase == .break_
-        if isRunning && countDownPhase && !playedLastFourSecondCounterThisSegment && remainingSeconds == 4 {
-            playedLastFourSecondCounterThisSegment = true
-            sessionAudio.playStartCounterTick()
+    private func syncFromClock() {
+        guard isRunning else { return }
+        let previousRemaining = remainingSeconds
+        if let end = segmentEndDate {
+            remainingSeconds = max(0, end.timeIntervalSinceNow)
         }
-        remainingSeconds -= 1
+        processElapsedTime(previousRemaining: previousRemaining)
+    }
+
+    private func tick() {
+        syncFromClock()
+    }
+
+    private func processElapsedTime(previousRemaining: TimeInterval) {
+        let countDownPhase = phase == .start || phase == .focus || phase == .break_
+
+        if isRunning && countDownPhase && !playedLastFourSecondCounterThisSegment {
+            let crossedFour = previousRemaining > 4 && remainingSeconds <= 4
+            if crossedFour || remainingSeconds == 4 {
+                playedLastFourSecondCounterThisSegment = true
+                sessionAudio.playStartCounterTick()
+            }
+        }
+
         if remainingSeconds <= 0 {
             advancePhase()
+            if isRunning && !hasReachedFinish {
+                segmentEndDate = Date().addingTimeInterval(remainingSeconds)
+                if remainingSeconds <= 0 {
+                    processElapsedTime(previousRemaining: phaseDuration() + 1)
+                }
+            }
             return
         }
-        if isRunning && countDownPhase && !playedLastFourSecondCounterThisSegment && remainingSeconds == 4 {
-            playedLastFourSecondCounterThisSegment = true
-            sessionAudio.playStartCounterTick()
-        }
+
         sessionAudio.refreshVolumes()
         timerLabel.text = Self.format(seconds: remainingSeconds)
+        syncLiveActivity()
+        syncWatchSession()
     }
 
     @objc private func prevTourTapped() {
@@ -604,6 +704,7 @@ final class TimerRunViewController: UIViewController {
             }
         }
         playedLastFourSecondCounterThisSegment = false
+        segmentEndDate = nil
         sessionAudio.syncMusic(phase: phase, timerKind: timer?.timerKind ?? .study)
         sessionAudio.refreshVolumes()
         updateUI()

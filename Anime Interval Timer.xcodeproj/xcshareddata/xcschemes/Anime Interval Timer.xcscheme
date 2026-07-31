@@ -21,6 +21,20 @@
                ReferencedContainer = "container:Anime Interval Timer.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "6CBB00012F6000010065E1C2"
+               BuildableName = "Anime Interval Timer Watch App.app"
+               BlueprintName = "Anime Interval Timer Watch App"
+               ReferencedContainer = "container:Anime Interval Timer.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction

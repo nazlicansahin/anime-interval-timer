@@ -40,6 +40,7 @@ final class TimersListViewController: UIViewController {
 
         haptic.prepare()
         applyChibiDesign()
+        setupRowTapGestures()
         setupInstantTimerRow()
         viewModel.reload()
         tableView?.reloadData()
@@ -92,6 +93,9 @@ final class TimersListViewController: UIViewController {
 
         row.addArrangedSubview(bolt)
         row.addArrangedSubview(lbl)
+        let instantTap = UITapGestureRecognizer(target: self, action: #selector(instantTimerTapped))
+        row.addGestureRecognizer(instantTap)
+        row.isUserInteractionEnabled = true
         view.addSubview(row)
         instantTimerStack = row
 
@@ -102,6 +106,12 @@ final class TimersListViewController: UIViewController {
             row.heightAnchor.constraint(equalToConstant: 52),
             tv.topAnchor.constraint(equalTo: row.bottomAnchor, constant: 12),
         ])
+    }
+
+    private func setupRowTapGestures() {
+        let addTap = UITapGestureRecognizer(target: self, action: #selector(openCreateTimer))
+        addNewTimerStack?.addGestureRecognizer(addTap)
+        addNewTimerStack?.isUserInteractionEnabled = true
     }
 
     @objc private func instantTimerTapped() {
@@ -115,7 +125,9 @@ final class TimersListViewController: UIViewController {
 
     private func applyChibiDesign() {
         titleLabel?.font = AppDesign.titleFont()
+        titleLabel?.textColor = AppDesign.accentPurple
         subtitleLabel?.font = AppDesign.captionFont()
+        subtitleLabel?.textColor = AppDesign.accentPurpleMuted
         subtitleLabel?.text = "Choose a timer or create new one! ✨"
         decorView.translatesAutoresizingMaskIntoConstraints = false
         if view.subviews.count > 0 {
@@ -156,6 +168,7 @@ final class TimersListViewController: UIViewController {
 
         viewModel.reload()
         tableView?.reloadData()
+        PhoneWatchConnectivity.shared.pushNow()
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -167,6 +180,10 @@ final class TimersListViewController: UIViewController {
     }
 
     @IBAction private func addNewTimerTapped(_ sender: UIButton) {
+        openCreateTimer()
+    }
+
+    @objc private func openCreateTimer() {
         haptic.impactOccurred()
         let createVC = CreateTimerViewController()
         createVC.delegate = self

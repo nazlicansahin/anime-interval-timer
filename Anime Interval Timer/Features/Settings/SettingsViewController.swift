@@ -10,7 +10,7 @@ final class SettingsViewController: UIViewController {
 
     override func loadView() {
         view = UIView()
-        view.backgroundColor = .systemBackground
+        view.backgroundColor = AppDesign.formSectionBackground
     }
 
     override func viewDidLoad() {
@@ -30,7 +30,7 @@ final class SettingsViewController: UIViewController {
         let intro = UILabel()
         intro.text = "Adjust background music and countdown / transition sounds."
         intro.font = AppDesign.captionFont()
-        intro.textColor = .secondaryLabel
+        intro.textColor = AppDesign.secondaryText
         intro.numberOfLines = 0
 
         contentStack.addArrangedSubview(intro)
@@ -68,10 +68,11 @@ final class SettingsViewController: UIViewController {
         let t = UILabel()
         t.text = title
         t.font = AppDesign.headlineFont()
+        t.textColor = AppDesign.primaryText
         let s = UILabel()
         s.text = subtitle
         s.font = AppDesign.captionFont()
-        s.textColor = .secondaryLabel
+        s.textColor = AppDesign.secondaryText
         s.numberOfLines = 0
         slider.minimumValue = 0
         slider.maximumValue = 1

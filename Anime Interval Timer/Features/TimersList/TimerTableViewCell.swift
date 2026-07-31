@@ -27,8 +27,13 @@ final class TimerTableViewCell: UITableViewCell {
         contentView.layer.borderColor = UIColor(red: 1, green: 0.9, blue: 0.95, alpha: 0.8).cgColor
         emojiLabel?.font = AppDesign.headlineFont()
         titleLabel?.font = AppDesign.bodyFont()
+        titleLabel?.textColor = AppDesign.primaryText
         loopsLabel?.font = AppDesign.captionFont()
-        [startValueLabel, focusValueLabel, breakValueLabel].forEach { $0?.font = AppDesign.smallFont() }
+        loopsLabel?.textColor = AppDesign.secondaryText
+        [startValueLabel, focusValueLabel, breakValueLabel].forEach {
+            $0?.font = AppDesign.smallFont()
+            $0?.textColor = AppDesign.secondaryText
+        }
         startButton?.titleLabel?.font = AppDesign.bodyFont()
         startButton?.layer.cornerRadius = AppDesign.cornerRadiusPill
         startButton?.clipsToBounds = true
