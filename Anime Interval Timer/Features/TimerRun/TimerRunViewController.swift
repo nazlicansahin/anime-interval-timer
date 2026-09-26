@@ -570,6 +570,7 @@ final class TimerRunViewController: UIViewController {
             timerTitle: timerTitleText(),
             phaseTitle: livePhaseTitle(),
             remainingSeconds: Int(ceil(remainingSeconds)),
+            segmentEndDate: isRunning ? segmentEndDate : nil,
             isRunning: isRunning
         )
     }
@@ -673,18 +674,14 @@ final class TimerRunViewController: UIViewController {
 
         if remainingSeconds <= 0 {
             advancePhase()
-            if isRunning && !hasReachedFinish {
-                segmentEndDate = Date().addingTimeInterval(remainingSeconds)
-                if remainingSeconds <= 0 {
-                    processElapsedTime(previousRemaining: phaseDuration() + 1)
-                }
+            if isRunning && !hasReachedFinish && remainingSeconds <= 0 {
+                processElapsedTime(previousRemaining: phaseDuration() + 1)
             }
             return
         }
 
         sessionAudio.refreshVolumes()
         timerLabel.text = Self.format(seconds: remainingSeconds)
-        syncLiveActivity()
         syncWatchSession()
     }
 
